@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const verifyToken = require('../security/auth');
 
 const {
     status,
@@ -13,16 +14,16 @@ const {
 
 router.get('/', status);
 
-router.post('/task', postTask);
+router.post('/task', verifyToken, postTask);
 
-router.get('/tasks', getAllTasks);
+router.get('/tasks', verifyToken, getAllTasks);
 
-router.get('/task/:id', getTaskById);
+router.get('/task/:id', verifyToken, getTaskById);
 
-router.get('/tasks/:pageNumber/:pageSize', getTasksPaginated);
+router.get('/tasks/:pageNumber/:pageSize', verifyToken, getTasksPaginated);
 
-router.put('/task', updateTask);
+router.put('/task', verifyToken, updateTask);
 
-router.delete('/task/:id', taskDelete);
+router.delete('/task/:id', verifyToken, taskDelete);
 
 module.exports = router;
