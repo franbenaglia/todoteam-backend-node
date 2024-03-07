@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const tasks_routes = require('./routes/tasks.js');
+const oauth2_google_routes = require('./routes/oauth2google.js');
+const oauth2_github_routes = require('./routes/oauth2github.js');
 const PORT = process.env.PORT || 8080;
 
 const app = express();
@@ -55,5 +57,7 @@ async function createTasksTable() {
 //createTasksTable();
 
 app.use('/api/task', tasks_routes);
+app.use('/auth', oauth2_google_routes);
+app.use('/auth', oauth2_github_routes);
 
 
