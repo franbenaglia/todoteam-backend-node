@@ -1,5 +1,5 @@
-import axios from 'axios';
-import * as queryString from 'query-string';
+const axios = require('axios');
+const queryString =  require('query-string');
 const { GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } = require('../constants.js');
 
 const getAccessTokenFromCode = async (code) => {

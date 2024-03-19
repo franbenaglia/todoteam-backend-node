@@ -1,4 +1,6 @@
 const { Pool } = require('pg');
+const uuid = require('uuid');
+const fs = require('fs');
 
 const pool = new Pool({
     user: 'postgres',
@@ -16,11 +18,10 @@ const status = (request, response) => {
     response.send(status);
 };
 
+
 const postTask = async (req, res) => {
 
     const { title, dir, description } = req.body;
-
-    console.log(req.body);
 
     if (!title || !dir || !description) {
         return res.status(400).send('One of the dir, or title, or description is missing in the data');
@@ -28,25 +29,64 @@ const postTask = async (req, res) => {
 
     try {
 
+        const queryTaskSequence = "select nextval('tasks_seq');";
+        const newTaskId = await pool.query(queryTaskSequence);
+        const insertTask = `
+        INSERT INTO tasks (title, dir, description,id)
+        VALUES ($1, $2, $3, $4)
+        RETURNING id;
+        `;
+        const taskId = newTaskId.rows[0].nextval;
+        const taskValues = [title, dir, description, taskId];
+        const task = await pool.query(insertTask, taskValues);
 
-        const querySequence = "select nextval('tasks_seq');";
-
-        const newId = await pool.query(querySequence);
-
-        const query = `
-       INSERT INTO tasks (title, dir, description,id)
-       VALUES ($1, $2, $3, $4)
-       RETURNING id;
-     `;
-        const values = [title, dir, description, newId.rows[0].nextval];
-
-        const result = await pool.query(query, values);
-        res.status(201).send({ message: 'New Task created', taskId: result.rows[0].id });
+        res.status(200).send({ message: 'New Task created', id: task.rows[0].id });
     } catch (err) {
         console.error(err);
         res.status(500).send('some error has occured');
     }
 };
+
+//https://stackoverflow.com/questions/76829274/how-to-send-and-receive-bytea-images-with-postgresql-node-pg-and-expressjs
+//en la url sube una imagen con formato de buffer (el de defecto de fs.readFileSync) a una psotgres
+//con un campo inagen bytea, el de la base creada por mi es oid
+const postImage = async (req, res) => {
+
+    const { avatar, id } = req.body;
+
+    const files = req.files;
+
+    if (!avatar) {
+        return res.status(400).send('No files or images');
+    }
+
+    try {
+
+        const uuidIden = uuid.v4();
+        const dataImagePrefix = 'data:' + files.avatar.type +  ';base64, ';
+
+        const insertFile = `
+          INSERT INTO files (id_task, data, file_name, file_type,  id)
+          VALUES ($1, $2, $3, $4, $5)
+          RETURNING id;
+         `;
+
+        const dataAsBuffer = fs.readFileSync(files.avatar.path); //, { encoding: "utf-8" }
+        console.log(dataAsBuffer);
+        //const dataAslob = new Blob(dataAsBuffer);
+        const dataAsBase64 = dataImagePrefix + dataAsBuffer.toString('base64');
+        console.log(dataAsBase64);
+        const fileValues = [id, dataAsBase64, files.avatar.originalFilename, files.avatar.type, uuidIden];
+        const file = await pool.query(insertFile, fileValues);
+
+        res.status(200).send({ message: 'New File created', uuidIden: uuidIden });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('some error has occured');
+    }
+};
+
+
 
 const getAllTasks = async (req, res) => {
     try {
@@ -87,6 +127,24 @@ const getTaskById = async (req, res) => {
         }
 
         res.status(200).json(rows[0]);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('failed');
+    }
+};
+
+const getTaskImageById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const query = 'SELECT * FROM files WHERE id_task = $1;';
+        const { rows } = await pool.query(query, [id]);
+
+        if (rows.length === 0) {
+            return res.status(404).send('this file or image is not in the database');
+        }
+        res.setHeader('content-type', 'image/png');
+        res.send(rows[0].data);
+        //res.status(200).json(rows[0]);
     } catch (err) {
         console.error(err);
         res.status(500).send('failed');
@@ -144,8 +202,10 @@ const taskDelete = async (req, res) => {
 module.exports = {
     status,
     postTask,
+    postImage,
     getAllTasks,
     getTaskById,
+    getTaskImageById,
     getTasksPaginated,
     updateTask,
     taskDelete

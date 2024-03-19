@@ -1,4 +1,4 @@
-import axios from 'axios';
+const axios = require('axios');
 const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } = require('../constants.js');
 
 const getAccessTokenFromCode  = async (code) => {
@@ -13,8 +13,9 @@ const getAccessTokenFromCode  = async (code) => {
             code,
         },
     });
-    console.log(data); // { access_token, expires_in, token_type, refresh_token }
-    return data.access_token;
+    console.log('access_token: ' + data.access_token); // { access_token, expires_in, token_type, refresh_token }
+    console.log('refresh_token: ' + data.refresh_token);
+    return  data.access_token;
 };
 
 module.exports = getAccessTokenFromCode;

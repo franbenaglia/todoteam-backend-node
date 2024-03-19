@@ -6,11 +6,17 @@ const getAuthCode = (request, response) => {
     response.status(200).json({ authURL: googleLoginUrl });
 };
 
-const getToken = (request, response) => {
-   
-    const { code } = request.params;
-    let tokenAccess = getAccessTokenFromCode(code);
-    response.send(200).json({ token: tokenAccess } );
+const getToken = async (request, response) => {
+
+    const { code } = request.query;
+    try {
+        const tokenAccess = await getAccessTokenFromCode(code);
+        response.json({ token: tokenAccess });
+         //agregar send aqui genera error de ERR_HTTP_HEADERS_SENT: Cannot set headers after they are sent to the client
+    } catch (error) {
+        console.log(error);
+    }
+
 };
 
 module.exports = { getAuthCode, getToken };

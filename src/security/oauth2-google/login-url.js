@@ -1,7 +1,6 @@
 // https://medium.com/@jackrobertscott/easy-google-auth-with-node-js-99ac40b97f4c
-
-import * as queryString from 'query-string';
-const GOOGLE_CLIENT_ID = require('../constants.js');
+const queryString =  require('query-string');
+const {GOOGLE_CLIENT_ID} = require('../constants.js');
 
 const stringifiedParams = queryString.stringify({
   client_id: process.env.GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID,

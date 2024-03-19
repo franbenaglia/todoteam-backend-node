@@ -1,11 +1,11 @@
-//
 
 const jwt = require('jsonwebtoken');
-const SECRET_KEY = require('./constants.js');
+const {SECRET_KEY}= require('./constants.js');
+const verifyGoogleToken = require('./filterOauth2Google.js');
 
 function verifyToken(req, res, next) {
 
-    const header = req.header('Authorization');//Bearer token 
+    const header = req.header('Authorization');
 
     if (!header) return res.status(401).json({ error: 'Access denied' });
 
@@ -16,7 +16,8 @@ function verifyToken(req, res, next) {
         req.userId = decoded.userId;
         next();
     } catch (error) {
-        res.status(401).json({ error: 'Invalid token' });
+        console.log('Invalid jwt token');
+        verifyGoogleToken(req, res, next);
     }
 };
 

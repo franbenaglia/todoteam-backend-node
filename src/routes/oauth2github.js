@@ -10,6 +10,6 @@ const {
 
 router.get('/url', getAuthCode);
 
-router.get('/callback/:code', getToken); //request desde front end con parametro code para obtener token
+router.get('/callback', getToken); 
 
 module.exports = router;
