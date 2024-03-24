@@ -5,7 +5,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs'); //password encrypt in db
 const jwt = require('jsonwebtoken');
 const { Pool } = require('pg');
-const SECRET_KEY = require('./constants.js');
+const {SECRET_KEY}= require('./constants.js');
 
 const pool = new Pool({
     user: 'postgres',

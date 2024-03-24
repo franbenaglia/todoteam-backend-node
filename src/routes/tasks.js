@@ -14,7 +14,7 @@ const {
     taskDelete
 } = require('../controllers/tasks.js');
 
-router.get('/', status);
+router.get('/status', status);
 
 router.post('/task', verifyToken, postTask);
 

@@ -2,7 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const registerLogin = require('./registerLogin.js');
 
-const PORT = process.env.PORT_SECURITY_SERVER || 8081;
+const client = require('./eureka/eureka-client.js');
+
+const {PORT}= require('./constants.js');
 
 const app = express();
 
@@ -22,7 +24,13 @@ app.use(express.json());
 app.use(cors(corsOptions));
 
 app.listen(PORT, () => {
-    console.log('server is listening on port 8081');
+    console.log('server is listening on port '+PORT);
 });
 
 app.use('/auth', registerLogin);
+
+client.start((error) => {
+    console.log(error || 'complete');
+});
+
+client.logger.level('debug');
